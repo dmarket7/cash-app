@@ -1,11 +1,19 @@
 /** Routes for users. */
 
-
 const express = require("express");
+const router = new express.Router();
 const ExpressError = require("../expressError")
 const db = require("../db");
 
-let router = new express.Router();
+const { ensureCorrectUser, authRequired } = require("../middleware/auth");
+
+const User = require("../models/user");
+// const { validate } = require("jsonschema");
+
+// const { userNewSchema, userUpdateSchema } = require("../schemas");
+
+const createToken = require("../helpers/createToken");
+
 
 
 /** GET / => list of users.
@@ -16,15 +24,10 @@ let router = new express.Router();
  *     }
  * */
 
-router.get("/", async function (req, res, next) {
+router.get("/", authRequired, async function (req, res, next) {
   try {
-    const result = await db.query(
-          `SELECT username, first_name, last_name, wallet, photo_url, bio
-           FROM users 
-           ORDER BY username`
-    );
-
-    return res.json({"users": result.rows});
+    const users = await User.findAll();
+    return res.json({ users });
   }
 
   catch (err) {
@@ -45,66 +48,16 @@ router.get("/", async function (req, res, next) {
  *
  * */
 
-router.get("/:username", async function (req, res, next) {
+router.get("/:username", authRequired, async function (req, res, next) {
   try {
-    let username = req.params.username;
-
-    const userResult = await db.query(
-      `SELECT username, first_name, last_name, wallet, photo_url, bio
-        FROM users
-        WHERE username = $1`,
-      [username]
-    );
-
-    if (userResult.rows.length === 0) {
-      throw new ExpressError(`No such user: ${username}`, 404)
-    }
-
-    const receivedResult = await db.query(
-      `SELECT id, sender, receiver, amt, paid_date
-        FROM transactions
-        WHERE receiver = $1`,
-      [username]
-    );
-
-    const sentResult = await db.query(
-      `SELECT id, sender, receiver, amt, paid_date
-       FROM transactions
-       WHERE sender = $1`,
-      [username]
-    );
-
-    const user = userResult.rows[0];
-    const receivedPayments = receivedResult.rows;
-    const sentPayments = sentResult.rows;
-
-    user.received_payments = receivedPayments.map(trns => {
-      return {
-        id: trns.id,
-        sender: trns.sender,
-        receiver: trns.receiver,
-        amt: trns.amt,
-        paid_date: trns.paid_date
-      }
-    });
-    user.sent_payments = sentPayments.map(trns => {
-      return {
-        id: trns.id,
-        sender: trns.sender,
-        receiver: trns.receiver,
-        amt: trns.amt,
-        paid_date: trns.paid_date
-      }
-    });
-
-    return res.json({"user": user});
+    const user = await User.findOne(req.params.username);
+    return res.json({ user });
   }
 
   catch (err) {
     return next(err);
   }
 });
-
 
 /** POST / => add new company
  *
@@ -114,52 +67,49 @@ router.get("/:username", async function (req, res, next) {
 
 router.post("/", async function (req, res, next) {
   try {
-    let {username, first_name, last_name} = req.body;
-    let lowerUsername = username.toLowercase();
+    delete req.body._token;
+    // const validation = validate(req.body, userNewSchema);
 
-    const result = await db.query(
-          `INSERT INTO users (username, first_name, last_name) 
-           VALUES ($1, $2, $3) 
-           RETURNING username, first_name, last_name`,
-        [lowerUsername, first_name, last_name]);
+    // if (!validation.valid) {
+    //   return next({
+    //     status: 400,
+    //     message: validation.errors.map(e => e.stack)
+    //   });
+    // }
 
-    return res.status(201).json({"user": result.rows[0]});
+    const newUser = await User.register(req.body);
+    const token = createToken(newUser);
+    return res.status(201).json({ token });
   }
-
-  catch (err) {
-    return next(err);
+  catch (e) {
+    return next(e);
   }
 });
 
 
-/** PUT /[username] => update user
- *
- * {first_name, last_name}  =>  {user: {username, first_name, last_name}}
- *
- * */
+/** PATCH /[handle] {userData} => {user: updatedUser} */
 
-router.put("/:username", async function (req, res, next) {
+router.patch("/:username", ensureCorrectUser, async function (req, res, next) {
   try {
-    let {username, first_name, last_name} = req.body;
-
-    const result = await db.query(
-          `UPDATE users
-           SET first_name=$1, last_name=$2
-           WHERE username = $3
-           RETURNING username, first_name, last_name`,
-        [first_name, last_name, username]);
-
-    if (result.rows.length === 0) {
-      throw new ExpressError(`No such user: ${username}`, 404)
-    } else {
-      return res.json({"user": result.rows[0]});
+    if ("username" in req.body || "is_admin" in req.body || "wallet" in req.body) {
+      return next({ status: 400, message: "Not allowed" });
     }
+
+    // const validation = validate(req.body, userUpdateSchema);
+    // if (!validation.valid) {
+    //   return next({
+    //     status:400,
+    //     message: validation.errors.map(e => e.stack)
+    //   });
+    // }
+
+    const user = await User.update(req.params.username, req.body);
+    return res.json({ user });
   }
 
   catch (err) {
     return next(err);
   }
-
 });
 
 
@@ -169,20 +119,20 @@ router.put("/:username", async function (req, res, next) {
  *
  */
 
-router.delete("/:username", async function (req, res, next) {
+router.delete("/:username", ensureCorrectUser, async function (req, res, next) {
   try {
     let username = req.params.username;
 
     const result = await db.query(
-          `DELETE FROM users
+      `DELETE FROM users
            WHERE username=$1
            RETURNING username`,
-        [username]);
+      [username]);
 
     if (result.rows.length == 0) {
       throw new ExpressError(`No such user: ${username}`, 404)
     } else {
-      return res.json({"status": "deleted"});
+      return res.json({ "status": "deleted" });
     }
   }
 
