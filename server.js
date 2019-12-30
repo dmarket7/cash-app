@@ -1,9 +1,10 @@
-/** Server startup for BizTime. */
+/** Server startup for Cash App. */
 
 
-const app = require("./app");
+const app = require('./app');
+const { PORT } = require("./config");
 
 
-app.listen(3000, function () {
-  console.log("Listening on 3000");
+app.listen(PORT, function () {
+  console.log(`Server starting on port ${PORT}!`);
 });

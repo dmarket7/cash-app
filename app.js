@@ -1,19 +1,21 @@
-/** BizTime express application. */
+/** Cash App express application. */
 
 
 const express = require("express");
+const app = express();
+const cors = require("cors");
 
 const ExpressError = require("./expressError")
 const usersRoutes = require("./routes/users");
 const transactionsRoutes = require("./routes/transactions");
-
-const app = express();
+const authRoutes = require("./routes/auth");
 
 
 app.use(express.json());
+app.use(cors());
 app.use("/users", usersRoutes);
 app.use("/transactions", transactionsRoutes);
-
+app.use("/", authRoutes);
 
 /** 404 handler */
 

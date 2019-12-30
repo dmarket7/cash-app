@@ -5,11 +5,13 @@ DROP TABLE IF EXISTS users;
 
 CREATE TABLE users (
     username text PRIMARY KEY,
+    password text NOT NULL,
     first_name text NOT NULL,
     last_name text NOT NULL,
     photo_url text DEFAULT 'https://icon-library.net/images/default-user-icon/default-user-icon-4.jpg',
     wallet float DEFAULT 10000,
-    bio text
+    bio text,
+    is_admin boolean DEFAULT false NOT NULL
 );
 
 CREATE TABLE transactions (
@@ -21,10 +23,10 @@ CREATE TABLE transactions (
     CONSTRAINT transactions_amt_check CHECK ((amt > (0)::double precision))
 );
 
-INSERT INTO users
-  VALUES ('dmarket7', 'Dario', 'Mercado'),
-         ('spongebob', 'Sponge', 'Bob');
+-- INSERT INTO users
+--   VALUES ('dmarket7', 'password', 'Dario', 'Mercado'),
+--          ('spongebob', 'password', 'Sponge', 'Bob');
 
-INSERT INTO transactions (sender, receiver, amt)
-  VALUES ('dmarket7', 'spongebob', 100),
-         ('spongebob', 'dmarket7', 200);
+-- INSERT INTO transactions (sender, receiver, amt)
+--   VALUES ('dmarket7', 'spongebob', 100),
+--          ('spongebob', 'dmarket7', 200);
