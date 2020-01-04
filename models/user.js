@@ -104,14 +104,16 @@ class User {
     const receivedResult = await db.query(
       `SELECT id, sender, receiver, amt, paid_date
         FROM transactions
-        WHERE receiver = $1`,
+        WHERE receiver = $1
+        ORDER BY id DESC`,
       [username]
     );
 
     const sentResult = await db.query(
       `SELECT id, sender, receiver, amt, paid_date
        FROM transactions
-       WHERE sender = $1`,
+       WHERE sender = $1
+       ORDER BY id DESC`,
       [username]
     );
 

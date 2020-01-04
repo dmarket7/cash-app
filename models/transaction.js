@@ -10,7 +10,7 @@ class Transaction {
     const result = await db.query(
       `SELECT id, sender, receiver, amt, paid_date
            FROM transactions 
-           ORDER BY id`
+           ORDER BY id DESC`
     );
 
     return result.rows;

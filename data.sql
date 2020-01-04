@@ -9,7 +9,7 @@ CREATE TABLE users (
     first_name text NOT NULL,
     last_name text NOT NULL,
     photo_url text DEFAULT 'https://icon-library.net/images/default-user-icon/default-user-icon-4.jpg',
-    wallet float DEFAULT 10000,
+    wallet decimal(19,2) DEFAULT 10000,
     bio text,
     is_admin boolean DEFAULT false NOT NULL
 );
@@ -18,7 +18,7 @@ CREATE TABLE transactions (
     id serial PRIMARY KEY,
     sender text NOT NULL REFERENCES users ON DELETE CASCADE,
     receiver text NOT NULL REFERENCES users ON DELETE CASCADE,
-    amt float NOT NULL,
+    amt decimal(19,2) NOT NULL,
     paid_date date DEFAULT CURRENT_DATE NOT NULL,
     CONSTRAINT transactions_amt_check CHECK ((amt > (0)::double precision))
 );
