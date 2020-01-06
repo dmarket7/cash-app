@@ -86,10 +86,7 @@ router.post("/", authRequired, async function (req, res, next) {
     }
 
     const newSenderWallet = parseFloat(senderQuery.wallet) - amt;
-    console.log("new sender wallet", newSenderWallet);
     const newReceiverWallet = parseFloat(receiverQuery.wallet) + amt;
-    console.log("new receiver wallet", newReceiverWallet);
-
 
     const updateSender = await User.update(sender, { wallet: newSenderWallet });
     const updateReceiver = await User.update(receiver, { wallet: newReceiverWallet });
