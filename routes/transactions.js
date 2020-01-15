@@ -69,17 +69,20 @@ router.post("/", authRequired, async function (req, res, next) {
     const receiverQuery = await User.findOne(receiver);
 
     // Check for input errors
+    if (amt <= 0) {
+      throw new ExpressError(`Please enter valid amount`, 404);
+    }
     if (sender === receiver) {
-      throw new ExpressError(`Sorry you can't send funds to same user: ${sender}`, 404)
+      throw new ExpressError(`Sorry you can't send funds to same user: ${sender}`, 404);
     }
     if (req.username !== sender) {
-      throw new ExpressError(`Sorry you cannot send funds from another user's account.`, 404)
+      throw new ExpressError(`Sorry you cannot send funds from another user's account.`, 404);
     }
     if (!senderQuery) {
-      throw new ExpressError(`Sender does not exist: ${sender}`, 404)
+      throw new ExpressError(`Sender does not exist: ${sender}`, 404);
     }
     if (!receiverQuery) {
-      throw new ExpressError(`Receiver does not exist: ${receiver}`, 404)
+      throw new ExpressError(`Receiver does not exist: ${receiver}`, 404);
     }
     if (senderQuery.wallet < amt) {
       throw new ExpressError(`Sorry not enough funds for user: ${sender}`, 404);
