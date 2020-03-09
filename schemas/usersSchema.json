@@ -1,0 +1,59 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "http://example.com/example.json",
+  "type": "object",
+  "title": "The Root Schema",
+  "description": "The root schema comprises the entire JSON document.",
+  "required": [
+      "username",
+      "password",
+      "first_name",
+      "last_name"
+  ],
+  "properties": {
+      "username": {
+          "$id": "#/properties/username",
+          "type": "string",
+          "minLength": 5,
+          "title": "The Username Schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": "",
+          "examples": [
+              "randomDude"
+          ]
+      },
+      "password": {
+          "$id": "#/properties/password",
+          "type": "string",
+          "minLength": 5,
+          "title": "The Password Schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": "",
+          "examples": [
+              "abc123"
+          ]
+      },
+      "first_name": {
+          "$id": "#/properties/first_name",
+          "type": "string",
+          "minLength": 1,
+          "title": "The First_name Schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": "",
+          "examples": [
+              "Random"
+          ]
+      },
+      "last_name": {
+          "$id": "#/properties/last_name",
+          "type": "string",
+          "minLength": 1,
+          "title": "The Last_name Schema",
+          "description": "An explanation about the purpose of this instance.",
+          "default": "",
+          "examples": [
+              "Dude"
+          ]
+      }
+  }
+}

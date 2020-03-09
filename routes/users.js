@@ -8,9 +8,9 @@ const db = require("../db");
 const { ensureCorrectUser, authRequired } = require("../middleware/auth");
 
 const User = require("../models/user");
-// const { validate } = require("jsonschema");
+const jsonschema = require('jsonschema');
 
-// const { userNewSchema, userUpdateSchema } = require("../schemas");
+const usersSchema = require("../schemas/usersSchema");
 
 const createToken = require("../helpers/createToken");
 
@@ -66,17 +66,14 @@ router.get("/:username", authRequired, async function (req, res, next) {
  * */
 
 router.post("/", async function (req, res, next) {
+  delete req.body._token;
+  const validUser = jsonschema.validate(req.body, usersSchema)
+  if (!validUser.valid) {
+    let listOfErrors = validUser.errors.map(error => error.stack);
+    let error = new ExpressError(listOfErrors, 400);
+    return next(error)
+  }
   try {
-    delete req.body._token;
-    // const validation = validate(req.body, userNewSchema);
-
-    // if (!validation.valid) {
-    //   return next({
-    //     status: 400,
-    //     message: validation.errors.map(e => e.stack)
-    //   });
-    // }
-
     const newUser = await User.register(req.body);
     const token = createToken(newUser);
     return res.status(201).json({ token });
