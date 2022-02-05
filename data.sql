@@ -24,8 +24,8 @@ CREATE TABLE transactions (
 );
 
 -- INSERT INTO users
---   VALUES ('dmarket7', 'password', 'Dario', 'Mercado'),
---          ('spongebob', 'password', 'Sponge', 'Bob');
+--   VALUES ('dmarket7', 'abc123', 'Dario', 'Mercado'),
+--          ('spongebob', 'abc123', 'Sponge', 'Bob');
 
 -- INSERT INTO transactions (sender, receiver, amt)
 --   VALUES ('dmarket7', 'spongebob', 100),
